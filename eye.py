@@ -6,8 +6,8 @@ from pupil import Pupil
 
 class Eye(object):
     """
-    This class creates a new frame to isolate the eye and
-    initiates the pupil detection.
+    Esta classe cria um novo quadro para isolar o olho e
+        inicia a detecção da pupila.
     """
 
     LEFT_EYE_POINTS = [36, 37, 38, 39, 40, 41]
@@ -24,11 +24,12 @@ class Eye(object):
 
     @staticmethod
     def _middle_point(p1, p2):
-        """Returns the middle point (x,y) between two points
+        """
+        Retorna o ponto médio (x,y) entre dois pontos
 
-        Arguments:
-            p1 (dlib.point): First point
-            p2 (dlib.point): Second point
+            Argumentos:
+            p1 (dlib.point): Primeiro ponto
+            p2 (dlib.point): Segundo ponto
         """
         x = int((p1.x + p2.x) / 2)
         y = int((p1.y + p2.y) / 2)
@@ -46,14 +47,14 @@ class Eye(object):
         region = region.astype(np.int32)
         self.landmark_points = region
 
-        # Applying a mask to get only the eye
+        # Aplicando uma máscara para cobrir apenas o olho
         height, width = frame.shape[:2]
         black_frame = np.zeros((height, width), np.uint8)
         mask = np.full((height, width), 255, np.uint8)
         cv2.fillPoly(mask, [region], (0, 0, 0))
         eye = cv2.bitwise_not(black_frame, frame.copy(), mask=mask)
 
-        # Cropping on the eye
+        # Corte no olho
         margin = 5
         min_x = np.min(region[:, 0]) - margin
         max_x = np.max(region[:, 0]) + margin
@@ -67,15 +68,15 @@ class Eye(object):
         self.center = (width / 2, height / 2)
 
     def _blinking_ratio(self, landmarks, points):
-        """Calculates a ratio that can indicate whether an eye is closed or not.
-        It's the division of the width of the eye, by its height.
+        """Calcula uma proporção que pode indicar se um olho está fechado ou não.
+            É a divisão da largura do olho, por sua altura.
 
-        Arguments:
-            landmarks (dlib.full_object_detection): Facial landmarks for the face region
-            points (list): Points of an eye (from the 68 Multi-PIE landmarks)
+            Argumentos:
+            landmarks (dlib.full_object_detection): Pontos de referência faciais para a região do rosto
+            points (lista): Pontos de um olho (dos 68 pontos de referência Multi-PIE)
 
-        Returns:
-            The computed ratio
+            Retorna:
+            A proporção computada
         """
         left = (landmarks.part(points[0]).x, landmarks.part(points[0]).y)
         right = (landmarks.part(points[3]).x, landmarks.part(points[3]).y)
@@ -93,14 +94,15 @@ class Eye(object):
         return ratio
 
     def _analyze(self, original_frame, landmarks, side, calibration):
-        """Detects and isolates the eye in a new frame, sends data to the calibration
-        and initializes Pupil object.
+        """
+        Detecta e isola o olho em um novo quadro, envia dados para a calibração
+            e inicializa o objeto Pupil.
 
-        Arguments:
-            original_frame (numpy.ndarray): Frame passed by the user
-            landmarks (dlib.full_object_detection): Facial landmarks for the face region
-            side: Indicates whether it's the left eye (0) or the right eye (1)
-            calibration (calibration.Calibration): Manages the binarization threshold value
+            Argumentos:
+            original_frame (numpy.ndarray): Quadro passado pelo usuário
+            landmarks (dlib.full_object_detection): Marcos faciais para a região do rosto
+            side: Indica se é o olho esquerdo (0) ou o olho direito (1)
+            calibration (calibration.Calibration): Gerencia o valor limite de binarização
         """
         if side == 0:
             points = self.LEFT_EYE_POINTS
